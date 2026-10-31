@@ -23,7 +23,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RECENT_COUNT: "3"
-          EXCLUDE: "kickstart.nvim,learn_cmake"
         run: python scripts/update_readme.py
       - name: Commit if changed
         run: |
