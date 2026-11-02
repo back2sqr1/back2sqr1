@@ -1,37 +1,49 @@
-name: Update profile README
+name: Update Recently Active Repositories
 
 on:
+  workflow_dispatch:
+
   schedule:
-    - cron: "17 13 * * *"   # once a day (13:17 UTC)
-  workflow_dispatch:        # run by hand from the Actions tab
-  push:
-    branches: [main]
-    paths: ["scripts/**", ".github/workflows/**"]
+    # Run every day at 08:00 UTC
+    - cron: "0 8 * * *"
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  update-readme:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          python-version: "3.12"
-      - name: Regenerate the recent-repositories section
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Update README
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RECENT_COUNT: "3"
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          RECENT_COUNT: 3
+          INCLUDE_PRIVATE: "false"
+          INCLUDE_FORKS: "false"
+          INCLUDE_ARCHIVED: "false"
         run: python scripts/update_readme.py
-      - name: Commit if changed
+
+      - name: Commit changes
         run: |
-          if git diff --quiet README.md; then
-            echo "No changes"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add README.md
-            git commit -m "Update recent repositories"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update recently active repositories"
             git push
+          else
+            echo "No README changes to commit."
           fi
