@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python3
 """Update README.md with recently pushed repositories.
 
@@ -196,4 +195,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
